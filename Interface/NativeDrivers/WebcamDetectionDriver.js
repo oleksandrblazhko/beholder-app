@@ -76,7 +76,7 @@ function WebcamDetectionDriver(cameraFeedChanges$) {
           let c2 = new Vec2(m.corners[2][0], m.corners[2][1]);
           let c3 = new Vec2(m.corners[3][0], m.corners[3][1]);
           let { x, y } = c0.add(c1).add(c2).add(c3).scale(0.25);
-          let rotation = AXIS_VEC.angleBetween(c1.sub(c0));
+          let rotation = AXIS_VEC.angleBetween(c1.sub(c0)) + (Math.PI / 4);
           markers[m.id].update({ x, y, rotation, id: m.id, corners: m.corners });
         });
 
