@@ -49,7 +49,7 @@ class Marker {
     this.center.y = (this.center.y * this.positionSmoothing) + (y * (1-this.positionSmoothing));
     this.position.copy(this.center);
     this.rawPosition.x = x;
-    this.rawPosition.x = y;
+    this.rawPosition.y = y;
     this.posX = Math.round(this.center.x);
     this.posY = Math.round(this.center.y);
 
