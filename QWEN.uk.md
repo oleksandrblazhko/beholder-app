@@ -63,8 +63,8 @@ npm start
 - Встановити OpenCV 4.7 з [офіційного інсталятора](https://opencv.org/releases/) для Windows
 - Рекомендований шлях встановлення: розпакувати архів у зручну директорію (наприклад, `C:\opencv`)
 - Обов'язково додайте шлях до папки `bin` з OpenCV у системну змінну середовища PATH, наприклад, 
-   - для Win: set PATH "%PATH%;C:\Users\User\opencv\build\x64\vc16\bin"
-   - для Bash: export PATH="$PATH:/c/Users/User/opencv/build/x64/vc16/bin" та зберегди у bash: nano ~/.bash_profile
+   - для Win: set PATH "%PATH%;C:\opencv\build\x64\vc16\bin"
+   - для Bash: export PATH="$PATH:/c/opencv/build/x64/vc16/bin" та зберегди у bash: nano ~/.bash_profile
 - перевірка роботи середовища, наприклад, через утиліту opencv_interactive-calibration для шаблонів:
    - Black-white chessboard (шахівниця) - https://github.com/opencv/opencv/blob/4.x/doc/pattern.png
    - Symmetrical circle pattern (кола) - https://github.com/opencv/opencv/blob/4.x/doc/acircles_pattern.png
