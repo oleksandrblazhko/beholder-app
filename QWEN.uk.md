@@ -136,3 +136,6 @@ https://o365coloradoedu-my.sharepoint.com/:u:/g/personal/pegy8859_colorado_edu/E
 
 ## Генерація ArUco-маркерів
 https://github.com/han-xudong/tags-generator
+
+## Webcam симулятор
+https://iriun.com/
