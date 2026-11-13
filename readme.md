@@ -24,8 +24,6 @@ npm install
 npm run build
 
 # Запустити застосунок з використанням камери=0 (для ОС Windows)
-$env:OPENCV_VIDEOIO_PRIORITY_MSMF = 0
-
 npm start
 
 ```
