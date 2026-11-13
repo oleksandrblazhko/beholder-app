@@ -23,8 +23,16 @@ npm install
 # Зібрати кодову базу JavaScript
 npm run build
 
-# Запустити застосунок з використанням камери=0 (для ОС Windows)
+# Запустити застосунок
 npm start
+
+# Запустити застосунок з автоматичним завантаженням файлу скрипту
+npm start -- AppExamples/test.json
+
+# Запустити застосунок з автозавантаженням та автозапуском (виконанням)
+npm start -- AppExamples/test.json --run
+# або скорочено:
+npm start -- AppExamples/test.json -r
 
 ```
 ### Особливості налаштування для платформ

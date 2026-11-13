@@ -23,8 +23,17 @@ function createWindow() {
     width: 1600,
   });
 
-  // and load the index.html of the app.
-  mainWindow.loadFile(path.join(__dirname, "./Interface/index.html"));
+  // and load the index.html of the app, passing CLI arguments
+  const cliArgs = process.argv.slice(2);
+  mainWindow.loadFile(path.join(__dirname, "./Interface/index.html"), {
+    query: {
+      cliArgs: JSON.stringify(cliArgs),
+    },
+  });
+
+  mainWindow.webContents.on("console-message", (event, level, message) => {
+    console.log(`[Beholder] ${message}`);
+  });
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools();

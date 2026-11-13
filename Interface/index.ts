@@ -10,6 +10,53 @@ import {div, button, svg, makeDOMDriver, h, a, img, input, label } from '@cycle/
 import NodePalette from './Components/NodePalette';
 import NodeManager from './NodeManager';
 
+// CLI argument parsing (supports: npm start -- path/to/script.json [--run|-r])
+let initialCliNodes: any = null;
+let cliAutoRun = false;
+
+try {
+  let cliArgs: string[] = [];
+
+  // 1. Read from URL query passed by main.js
+  if (typeof window !== 'undefined' && window.location && window.location.search) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryArgs = urlParams.get('cliArgs');
+    if (queryArgs) {
+      try {
+        cliArgs = JSON.parse(queryArgs);
+      } catch (e) {}
+    }
+  }
+
+  // 2. Fallback to process.argv
+  if (!cliArgs || cliArgs.length === 0) {
+    const electronProcess = (window as any).process;
+    if (electronProcess && Array.isArray(electronProcess.argv)) {
+      cliArgs = electronProcess.argv.slice(1);
+    }
+  }
+
+  if (Array.isArray(cliArgs) && cliArgs.length > 0) {
+    cliAutoRun = cliArgs.some((arg: string) => arg === '--run' || arg === '-r' || arg === '--autorun');
+    const jsonArg = cliArgs.find((arg: string) => arg && !arg.startsWith('-') && arg.toLowerCase().endsWith('.json'));
+
+    const electronFs = (window as any).fs || (typeof require !== 'undefined' ? require('fs') : null);
+    const electronPath = (window as any).path || (typeof require !== 'undefined' ? require('path') : null);
+
+    if (jsonArg && electronFs && electronPath) {
+      const fullPath = electronPath.isAbsolute(jsonArg) ? jsonArg : electronPath.resolve(process.cwd(), jsonArg);
+      if (electronFs.existsSync(fullPath)) {
+        initialCliNodes = JSON.parse(electronFs.readFileSync(fullPath, 'utf8'));
+        console.log('CLI: Successfully loaded script from', fullPath);
+      } else {
+        console.warn('CLI: File not found at', fullPath);
+      }
+    }
+  }
+} catch (e) {
+  console.error('CLI: Error parsing arguments', e);
+}
+
 function main(sources: any) {
   const { DOM } = sources;
 
@@ -23,7 +70,7 @@ function main(sources: any) {
 
   const esc$ = globalKeyDown$.filter((ev) => ev.key === 'Escape');
   const rightClick$ = fromEvent(document, 'contextmenu').map((ev) => { ev.preventDefault(); return ev; });
-  const runStopButton$ = DOM.select('#run-button').events('click').fold((prev) => !prev, false).startWith(false);
+  const runStopButton$ = DOM.select('#run-button').events('click').fold((prev: boolean) => !prev, false).startWith(false);
 
   const mousePos$ = DOM.events('mousemove')
     .fold((pos, ev: MouseEvent) => ({
@@ -44,11 +91,15 @@ function main(sources: any) {
       return totalPan;
     }, { panX: 0, panY: 0 });
 
-  const loadedNodes$ = DOM.select('#load-input').events('change')
-    .map(e => e.target.files)
+  const cliLoaded$ = initialCliNodes ? xs.of(initialCliNodes) : xs.empty();
+
+  const fileInputLoaded$ = DOM.select('#load-input').events('change')
+    .map((e: any) => e.target.files)
     .map(R.last)
-    .map((f) => xs.fromPromise(fetch(f.path).then(res => res.json())))
+    .map((f: any) => xs.fromPromise(fetch(f.path).then((res: any) => res.json())))
     .flatten();
+
+  const loadedNodes$ = xs.merge(cliLoaded$, fileInputLoaded$);
   
   // .map((ev: MouseEvent) => ({ x: ev.clientX, y: ev.clientY, dx: ev.movementX, dy: ev.movementY }));
 
@@ -118,3 +169,13 @@ function main(sources: any) {
 }
 
 run(main, { DOM: makeDOMDriver('#main-app'),  WebcamDetection: WebcamDetectionDriver, ProgramManager: ProgramDriver });
+
+if (cliAutoRun) {
+  setTimeout(() => {
+    const btn = document.getElementById('run-button');
+    if (btn) {
+      btn.click();
+      console.log('CLI: Auto-run successfully triggered via run-button');
+    }
+  }, 700);
+}
