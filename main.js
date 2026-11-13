@@ -1,3 +1,6 @@
+process.env.OPENCV_VIDEOIO_PRIORITY_MSMF = "0";
+process.env.OPENCV_VIDEOIO_PRIORITY_DSHOW = "1000";
+
 const { app, BrowserWindow, systemPreferences } = require("electron");
 const path = require("path");
 

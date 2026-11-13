@@ -219,6 +219,10 @@ span.select-label {
   pointer-events: none;
 }
 
+.detection-img.flipped {
+  transform: scaleX(-1);
+}
+
 .detection-select {
   background: var(--gray-light);
   margin-top: 2px;

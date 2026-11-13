@@ -28,13 +28,23 @@ function WebcamDetectionDriver(cameraFeedChanges$) {
           break;
         case 'flip':
           shouldFlip = value;
+          const imgEl = document.querySelector('.detection-img');
+          if (imgEl) {
+            imgEl.classList.toggle('flipped', !!shouldFlip);
+          }
           break;
       }
     },
   })
 
   // detection thread init
-  const detectThread = spawn(detectExePath);
+  const detectThread = spawn(detectExePath, [], {
+    env: {
+      ...process.env,
+      OPENCV_VIDEOIO_PRIORITY_MSMF: '0',
+      OPENCV_VIDEOIO_PRIORITY_DSHOW: '1000',
+    }
+  });
   detectThread.stdin.setDefaultEncoding('utf-8');
   window.addEventListener("beforeunload", () => { detectThread.kill() });
 
@@ -52,7 +62,7 @@ function WebcamDetectionDriver(cameraFeedChanges$) {
     if (detectFrameTime <= 0) {
       detectFrameTime = 1000 / 45; // Detection FPS HERE
       detectThread.stdin.cork();
-      detectThread.stdin.write(`001${shouldFlip}\r\n`);
+      detectThread.stdin.write(`0010\r\n`);
       detectThread.stdin.uncork();
     } else {
       requestAnimationFrame(detectionLoop);
@@ -77,6 +87,12 @@ function WebcamDetectionDriver(cameraFeedChanges$) {
           let c3 = new Vec2(m.corners[3][0], m.corners[3][1]);
           let { x, y } = c0.add(c1).add(c2).add(c3).scale(0.25);
           let rotation = AXIS_VEC.angleBetween(c1.sub(c0)) + (Math.PI / 4);
+
+          if (shouldFlip) {
+            x = 640 - x;
+            rotation = -rotation;
+          }
+
           markers[m.id].update({ x, y, rotation, id: m.id, corners: m.corners });
         });
 
@@ -92,7 +108,11 @@ function WebcamDetectionDriver(cameraFeedChanges$) {
         try {
           const data = JSON.parse(rawData);
 
-          if (document.querySelector('.detection-img') && data.type === 'img-done') document.querySelector('.detection-img').src = `${detectImgPath}${Date.now()}`;
+          const img = document.querySelector('.detection-img');
+          if (img && data.type === 'img-done') {
+            img.src = `${detectImgPath}${Date.now()}`;
+            img.classList.toggle('flipped', !!shouldFlip);
+          }
           if (data.markers) {
             updateMarkers(data.markers);
             requestAnimationFrame(detectionLoop);
